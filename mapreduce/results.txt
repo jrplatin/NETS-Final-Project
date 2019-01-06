@@ -1,0 +1,10 @@
+1. DBpedia URL: http://dbpedia.org/resource/Hog_Island,_Philadelphia
+2. 4
+http://dbpedia.org/resource/Tinicum_Township,_Delaware_County,_Pennsylvania
+http://dbpedia.org/resource/Eastwick_(SEPTA_station)
+http://dbpedia.org/resource/Eastwick_Loop_(SEPTA_station)
+http://dbpedia.org/resource/Southwest_Philadelphia
+I didn't county the airport itself or Hog Island.
+3.http://dbpedia.org/resource/Westfield_Southcenter
+
+

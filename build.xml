@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="final-project" default="pack" basedir=".">
+  <target name="pack" description="Create an archive for submission">
+    <zip destfile="final-project.zip">
+      <zipfileset dir="." excludes="node_modules/**, app/node_modules/**, docs/**, final-project.zip"/>
+    </zip>
+  </target>
+</project>

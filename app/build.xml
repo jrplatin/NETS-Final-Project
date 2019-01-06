@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="HW4" default="pack" basedir=".">
+  <target name="pack" description="Create an archive for submission">
+    <zip destfile="submit-hw4.zip">
+      <zipfileset dir="." excludes="node_modules/**,submit-hw4.zip"/>
+    </zip>
+  </target>
+</project>

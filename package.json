@@ -1,0 +1,19 @@
+{
+  "name": "g12",
+  "version": "1.0.0",
+  "description": "PennBook by Jacob Platin, Ben Robinov, and John Sarihan",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://G12@nets212.cis.upenn.edu/git/nets212/G12"
+  },
+  "author": "jplatin, brobinov, jsarihan",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.15.2",
+    "socket.io": "^2.2.0"
+  }
+}

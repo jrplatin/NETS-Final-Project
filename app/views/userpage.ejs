@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <title>PennBook</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <link href="/css/bootstrap.css" rel="stylesheet">
+				<link href="/css/pennbook.css" rel="stylesheet">
+				<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+				<script language="javascript" type="text/javascript" src="/js/pennbook.js"></script>
+
+
+
+    </head>
+    <script>
+
+
+
+		$(document).ready(function(){
+
+
+
+		//check if friend or not and unfriend
+		$("#addButton").click(function(){
+
+			//$.post("createFriendRequest",function(data, status){
+			  //if(data == "already friend"){
+			    //alert("You're already friends!");
+
+			  //}
+
+
+			//});
+			alert("Friend added!");
+
+
+		});
+
+		$("#removeButton").hide();
+
+		$("#removeButton").click(function (){
+
+
+
+
+		});
+
+
+
+		//refresh the page
+		//setInterval(refreshPage, 15000);
+
+
+		//function refreshPage(){
+
+				  //$.get("/feed", function(data, status){
+
+					//});
+
+		//}
+
+
+		$("#commentInput").keypress(function (e) {
+		        if(e.which == 13) {
+		            e.preventDefault();
+		            //send the comment, need object?
+		        }
+		});
+
+
+
+		$('[data-toggle="popover"]').popover({
+		    html:true,
+		    content:function(){
+		    return ("<span id = 'leaveChat' style = 'cursor: pointer;color: #3B5999;'>Leave Chat</span><br><span href='#addMemberModal' data-toggle='modal'  id = 'addMem' style = 'cursor: pointer; color: #3B5999;'>Add members to chat</span>");
+	    },
+	    });
+
+		$("#chatSettings").hide();
+
+
+		   $(document).on('click', "#leaveChat", function() {
+
+
+		   $('[data-toggle="popover"]').popover('hide')
+
+		  		 	$('#chatActual').find('td').hide();
+		   			   	$('#chatSettings').find('td').hide();
+
+			   		$('#activeFriends').find('td').show();
+			   		//refresh page
+
+		   });
+
+		   $(document).on('click', "#addMem", function() {
+
+
+
+		   });
+
+
+
+			$("#textMessage").keypress(function (e) {
+		        if(e.which == 13) {
+		            e.preventDefault();
+		            console.log("cool");
+		        }
+		    });
+
+
+		    $("#postWallButton").click(function() {
+
+
+		    	 if ($('#wallFile').get(0).files.length === 0) {
+
+					} else {
+						formData = new FormData();
+						formData.append("profilePicture", $('#updatePic').get(0).files[0]);
+						$.ajax({
+							  url: "uploadProfilePicture",
+							  data: formData,
+							  processData: false,
+							  contentType: false,
+							  type: 'POST',
+							  success: function(data) {
+							        var response = parseJSON(data);
+							        if(response.code == "success") {
+							            alert("Updated Profile Picture");
+							        } else if(response.code == "failure") {
+							            alert(response.err);
+							        }
+							    }
+							});
+					}
+
+
+		    });
+
+		    $("#modalProUp").click(function (){
+		       if ($('#updatePic').get(0).files.length === 0) {
+					   alert("No picture selected.");
+					} else {
+						formData = new FormData();
+						formData.append("profilePicture", $('#updatePic').get(0).files[0]);
+						$.ajax({
+							  url: "uploadProfilePicture",
+							  data: formData,
+							  processData: false,
+							  contentType: false,
+							  type: 'POST',
+							  success: function(data) {
+							        var response = parseJSON(data);
+							        if(response.code == "success") {
+							            alert("Updated Profile Picture");
+							        } else if(response.code == "failure") {
+							            alert(response.err);
+							        }
+							    }
+							});
+					}
+		    });
+
+
+
+			$("#modalUpdateButton").click(function(){
+				var interests = $("#interestsModal").val();
+				var firstName = $("#firstNameModal").val();
+				var lastName = $("#lastNameModal").val();
+				var affi = $("#affilModal").val();
+
+				if(interests.length < 2 || firstName.length < 3 || lastName.length < 3 || affi.length < 2){
+						alert("Please enter a valid email, affiliation, and/or interest")
+				} else  {
+					  //$('#updateModal').modal('toggle');
+			      console.log(<%- JSON.stringify(profile.profile) %>);
+					var newProfile = (<%- JSON.stringify(profile.profile) %>);
+					newProfile.interests = interests;
+					newProfile.first = firstName;
+					newProfile.last = lastName;
+					newProfile.affiliation = affi;
+
+					var email = "<%= profile.email %>";
+			 		$.post("updateProfile", { email: email, profile : newProfile}, function(data, status){
+						    						window.location = "feed";
+
+			 		});
+			 	}
+		   });
+
+		   $('#chatActual').find('td').hide();
+		   $('#activeChats').find('td').hide();
+
+		   $("#seeChats").click(function(){
+		   			   		$('#chatActual').find('td').hide();
+		   			   				$("#chatSettings").hide();
+
+
+			   	if($('#activeFriends').find('td').is(":visible")){
+			   		$('#activeFriends').find('td').hide();
+			   		$('#activeChats').find('td').show();
+
+			   	} else{
+			   	     	$('#activeChats').find('td').hide();
+			   			$('#activeFriends').find('td').show();
+
+
+			   	}
+
+		   });
+
+
+
+			 $("#activeChats").on("click", "td", function() {
+			 		$("#chatSettings").show();
+
+			  $("#activeChats").find('td').hide();
+		     	$("#chatActual").find('td').show();
+		   });
+
+
+
+		});
+
+
+
+    </script>
+
+    <body>
+
+        <div class="wrapper">
+			<div class="box">
+				<div class="row row-offcanvas row-offcanvas-left">
+
+
+
+					<!-- main right col -->
+					<div id="main">
+
+						<!-- top nav -->
+						<div class="navbar navbar-blue navbar-fixed-top ">
+							<div class="navbar-header">
+							  <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+								<span class="sr-only">Toggle</span>
+								<span class="icon-bar"></span>
+								<span class="icon-bar"></span>
+								<span class="icon-bar"></span>
+							  </button>
+							  <a href="/feed" class="navbar-brand logo">p</a>
+							</div>
+							<nav class="collapse navbar-collapse" role="navigation">
+							<form autocomplete = "off" class="navbar-form navbar-left">
+								<div class="autocomplete input-group input-group-sm" style="max-width:360px;">
+								  <input id = "autoSearch" class="form-control" placeholder="Search" name="srch-term" id="srch-term" type="text">
+								  <div class="input-group-btn">
+									<button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+								  </div>
+								</div>
+							</form>
+							<ul class="nav navbar-nav">
+							  <li>
+								<a href="/feed"><i class="glyphicon glyphicon-home"></i> Home</a>
+							  </li>
+							  <li>
+								<a href="#postModal" role="button" data-toggle="modal"><i class="glyphicon glyphicon-plus"></i> Post</a>
+							  </li>
+							   <li>
+								<a  onclick = "hideShowChat()" role="button"><i class="glyphicon glyphicon-comment"></i> Chat</a>
+							  </li>
+
+
+							  <li>
+									<a href="/logout"><i class="glyphicon glyphicon-log-out"></i> Logout</a>
+								</li>
+
+							</ul>
+
+							</nav>
+						</div>
+						<!-- /top nav -->
+
+						<div class="padding">
+							<div class="full col-sm-9">
+
+								<!-- content -->
+								<div class="row">
+
+								 <!-- main col left -->
+								 <div class="col-sm-5" id = "sideStuff">
+
+									  <div class="panel panel-default">
+										<div class="panel-thumbnail"><img src="http://www.phipsipenniota.com/uploads/9/6/2/4/96244566/published/96069911-platin-jacob.jpg?1538602492" class="img-responsive"></div>
+										<div style = "text-align: center"  class="panel-body">
+											<p style = "font-size:2em" class="lead"><%= profile.profile.first %> <%= profile.profile.last %></p>
+											<button id = "addButton" class="btn btn-primary btn-sm" href = "#"> Add Friend </button>
+											<br>
+											<button style = "margin-top: 10px;"data-toggle="modal" id = "removeButton" class="btn btn-primary btn-sm" href = "#"> Remove Friend </button>
+											<button style = "margin-top: 10px;" href="#postToFriend" data-toggle="modal" id = "postToWall" class="btn btn-primary btn-sm" href = "#"> Post to Wall </button>
+
+
+										</div>
+									  </div>
+
+
+									  <div class="panel panel-default">
+										<div class="panel-heading"> <h4>My Info</h4></div>
+										  <div class="panel-body">
+											<div class="list-group">
+											  <a class="list-group-item">Birthday: <%= profile.profile.birthday %></a>
+											  <a  class="list-group-item">Interests: <%= profile.profile.interests %></a>
+												<a  class="list-group-item">Email: <%= profile.email %></a>
+												<a  class="list-group-item">Affiliation: <%= profile.profile.affiliation %></a>
+											</div>
+										  </div>
+									  </div>
+
+
+
+
+
+
+								  </div>
+
+								  <!-- main col right -->
+
+								  <div id = "putUnder" class="col-sm-7">
+
+										<script>
+										 //var feedObject = <%- JSON.stringify() %>;
+
+										 //feedObject.forEach(function(el){
+
+
+
+										 //});
+
+										 var element = document.getElementById("putUnder");
+										   var newElement = '' +
+											   '<div class=" panel panel-default">' +
+											 '<div class="populated panel-heading">' +
+											 '<h4>Henry posted a new status</h4></div>' +
+											  '<div class="populated panel-body">' +
+												'<div class="clearfix"></div><p>Hello World!</p>' +
+												'</div><div class = "panel-footer">' +
+												'<form><div class="input-group">' +
+												  '<div class="input-group-btn">' +
+												  '</div> <input id = "commentInput" class="form-control" placeholder="Add a comment.." type="text">' +
+												'</div></form></div></div>';
+
+
+
+											element.innerHTML = newElement ;
+
+
+										</script>
+
+
+
+
+
+								  </div>
+							   </div><!--/row-->
+
+
+								<div class="row" id="footer">
+
+								</div>
+
+
+
+							</div><!-- /col-9 -->
+						</div><!-- /padding -->
+					</div>
+					<!-- /main -->
+
+				</div>
+			</div>
+		</div>
+
+
+		<!-- update modal-->
+		<div id="updateModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+				<div class="modal-dialog">
+				<div class="modal-content">
+
+					<div class="modal-body">
+							<div class="panel panel-default">
+						 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+
+									<div class="panel-heading"> <h4>My Info</h4></div>
+										<div class="panel-body">
+											<input = "text" style = "display:inline-block; margin-bottom:5px" id = "interestsModal" placeholder = "Interests" class="list-group-item">
+										   <button style = "margin-left: 10px" display:inline-block" id = "addInterestButton" class="btn btn-primary btn-sm"  aria-hidden="true">Add Interest</button>
+											<p id = "removeInterest"> Click to remove an interest: </p>
+											<script>
+
+
+											document.onreadystatechange = function () {
+											 console.log("<%= profile.profile.interests%>");
+
+													  if(document.readyState === "complete"){
+													var list = "<%= profile.profile.interests%>".split(",");
+													list.forEach(function(el){
+													var element = document.getElementById("removeInterest");
+													var newElement = '<div onclick = "remove(this," + list + ")" id="two">' + el + '</div>';
+													element.insertAdjacentHTML( 'afterend', newElement );
+													});
+												 }
+												}
+
+											</script>
+											<input = "text" style = "margin-bottom:5px"  id = "firstNameModal" placeholder = "First Name" value = "<%= profile.profile.first%>" class="list-group-item">
+											<input = "text" style = "margin-bottom:5px"  id = "lastNameModal" value = "<%= profile.profile.last%>" placeholder = "Last Name" class="list-group-item">
+
+											<input = "text" style = "margin-bottom:5px"  id = "affilModal" value = "<%= profile.profile.affiliation%>" placeholder = "Affiliation" class="list-group-item">
+											<button id = "modalUpdateButton" class="btn btn-primary btn-sm"  aria-hidden="true">Update!</button>
+										</div>
+									</div>
+					</div>
+
+				</div>
+				</div>
+			</div>
+
+
+			<!-- profile pic modal-->
+		<div id="updateProfilePic" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+				<div class="modal-dialog">
+				<div class="modal-content">
+
+					<div class="modal-body">
+							<div class="panel panel-default">
+						 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+
+									<div class="panel-heading"> <h4>Update Profile Picture</h4></div>
+										<div class="panel-body">
+
+								<input id = "updatePic" type="file" name="pic" accept="image/*">
+								<br>
+											<button id = "modalPicUpload" class="btn btn-primary btn-sm"  aria-hidden="true">Update!</button>
+										</div>
+									</div>
+					</div>
+
+				</div>
+				</div>
+			</div>
+
+
+				<!-- add member modal-->
+		<div id="addMemberModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+				<div class="modal-dialog">
+				<div class="modal-content">
+
+					<div class="modal-body">
+							<div class="panel panel-default">
+						 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+
+									<div class="panel-heading"> <h4>Add Member to Chat</h4></div>
+										<div class="panel-body">
+
+										<form autocomplete = "off">
+											<div class="autocomplete input-group input-group-sm">
+											  <input id = "autoSearch2" class="form-control" placeholder="Search" name="srch-term" id="srch-term" type="text">
+											  <div class="input-group-btn">
+											  </div>
+											</div>
+										</form>
+
+											<br>
+											<button id = "modalAddMember" class="btn btn-primary btn-sm"  aria-hidden="true">Add!</button>
+										</div>
+									</div>
+					</div>
+
+				</div>
+				</div>
+			</div>
+
+						<!-- new chat modal-->
+		<div id="newChatModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+				<div class="modal-dialog">
+				<div class="modal-content">
+
+					<div class="modal-body">
+							<div class="panel panel-default">
+						 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+
+									<div class="panel-heading"> <h4>Start A New Chat</h4></div>
+										<div class="panel-body">
+
+										<form autocomplete = "off">
+											<div class="autocomplete input-group input-group-sm">
+											  <input id = "autoSearch3" class="form-control" placeholder="Search" name="srch-term" id="srch-term" type="text">
+											  <div class="input-group-btn">
+											  </div>
+											</div>
+										</form>
+
+											<br>
+											<button id = "modalAddMember" class="btn btn-primary btn-sm"  aria-hidden="true">Start!</button>
+										</div>
+									</div>
+					</div>
+
+				</div>
+				</div>
+			</div>
+
+		<!-- wall modal -->
+		<div id="postToFriend" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+		  <div class="modal-dialog">
+		  <div class="modal-content">
+			  <div class="modal-header">
+				  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+					Post to Friend's Wall
+			  </div>
+			  <div class="modal-body">
+				  <form class="form center-block">
+					<div class="form-group">
+					  <textarea class="form-control input-lg" autofocus="" placeholder="What's on your mind?"></textarea>
+					</div>
+				  </form>
+			  </div>
+			  <div class="modal-footer">
+				  <div>
+							<form action="/action_page.php">
+								<input id = "wallFile" type="file" name="pic" accept="image/*">
+								<button id = "postWallButton" class="btn btn-primary btn-sm" data-dismiss="modal" aria-hidden="true">Post</button>
+
+							</form>
+				  </div>
+			  </div>
+		  </div>
+		  </div>
+
+		<!--post modal-->
+		<div id="postModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+		  <div class="modal-dialog">
+		  <div class="modal-content">
+			  <div class="modal-header">
+				  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+					Update Status
+			  </div>
+			  <div class="modal-body">
+				  <form class="form center-block">
+					<div class="form-group">
+					  <textarea class="form-control input-lg" autofocus="" placeholder="What's on your mind?"></textarea>
+					</div>
+				  </form>
+			  </div>
+			  <div class="modal-footer">
+				  <div>
+							<form action="/action_page.php">
+								<input type="file" name="pic" accept="image/*">
+								<button class="btn btn-primary btn-sm" data-dismiss="modal" aria-hidden="true">Post</button>
+
+							</form>
+				  </div>
+			  </div>
+		  </div>
+		  </div>
+		</div>
+		      <div style="overflow-y: scroll" id="chatWindow">
+
+		      <div id = "cont" style = "position: fixed;">
+
+					    <div href="#newChatModal" data-toggle="modal" style = "margin-top: 3px; margin-left: 5px; position:relative;display:inline-block" id = "newChat" class="glyphicon glyphicon-plus"></div>
+					    <a style = "margin-left: 8px; position:relative;display:inline-block" id = "seeChats" class="glyphicon glyphicon-list"></a>
+					    <div  title="Chat Settings" data-toggle="popover" data-placement="top" data-content=""  style = "margin-left: 8px; position:relative;display:inline-block" id = "chatSettings" class="glyphicon glyphicon-cog"></div>
+
+					    <span style = "position:relative;display:inline-block"  onclick = "hideShowChat()" class = "pull-right" id='close' onclick=''; return false;'>x</span>
+				</div>
+				<br>
+		      <table id = "activeFriends" style="width:100%">
+					<tbody>
+					  <tr>
+					    <td>Jill</td>
+					    <td>Morgan</td>
+					    <td id = "status"><span class="dot"></span></td>
+					  </tr>
+					  <tr>
+					    <td>Eve</td>
+					    <td>Jackson</td>
+					    <td id = "status"><span class="dot"></span></td>
+					  </tr>
+					  	  <tr>
+					    <td>Eve</td>
+					    <td>Jackson</td>
+					    <td id = "status"><span class="dot"></span></td>
+					  </tr>
+					  	  <tr>
+					    <td>Eve</td>
+					    <td>Jackson</td>
+					    <td id = "status"><span class="dot"></span></td>
+					  </tr>
+					  	  <tr>
+					    <td>Eve</td>
+					    <td>Jackson</td>
+					    <td id = "status"><span class="dot"></span></td>
+					  </tr>
+					  	  <tr>
+					    <td>Eve</td>
+					    <td>Jackson</td>
+					    <td id = "status"><span class="dot"></span></td>
+					  </tr>
+					  	  <tr>
+					    <td>Eve</td>
+					    <td>Jackson</td>
+					    <td id = "status"><span class="dot"></span></td>
+					  </tr>
+					 </tbody>
+					</table>
+
+
+		      	 <table id = "activeChats" style="width:100%">
+					 	<tr>
+					    <td style = "border-top: 3.5px solid #f9f9f9; padding: 6px;" >Jill, Ryan, Andrew</td>
+					  </tr>
+					  <tr>
+					    <td style = "	padding: 6px;" >Jill</td>
+					  </tr>
+					   <tr>
+					    <td style = "	padding: 6px;" >Jill</td>
+					  </tr> <tr>
+					    <td style = "	padding: 6px;" >Jill</td>
+					  </tr> <tr>
+					    <td style = "	padding: 6px;" >Jill</td>
+					  </tr>
+					   <tr>
+					    <td style = "	padding: 6px;" >Jill</td>
+					  </tr>
+					   <tr>
+					    <td style = "	padding: 6px;" >Jill</td>
+					  </tr>
+					</table>
+
+
+					<table id = "chatActual" style="width:100%">
+					 	<tr>
+					    <td style = "border-top: 15px solid #f9f9f9;  border-bottom: 15px solid #f9f9f9;: padding: 6px;" >Jill: Hey, what's up man, hope
+					    everything is going well!</td>
+					  </tr>
+					  <tr>
+					    <td style = "border-bottom: 15px solid #f9f9f9; padding: 6px;background-color: #e6ebff">You: Yep, it definitely is, thanks man!</td>
+					  </tr>
+					  <tr>
+					 	 <td>
+    						<textarea id = "textMessage" style = "width:100%;  resize: none;" name="" id=""rows="3"></textarea>
+					 	 </td>
+
+					  </tr>
+
+					</table>
+
+
+
+		      </div>
+
+
+        <script type="text/javascript" src="/js/jquery.js"></script>
+        <script type="text/javascript" src="/js/bootstrap.js"></script>
+        <script type="text/javascript">
+        $(document).ready(function() {
+			$('[data-toggle=offcanvas]').click(function() {
+				$(this).toggleClass('visible-xs text-center');
+				$(this).find('i').toggleClass('glyphicon-chevron-right glyphicon-chevron-left');
+				$('.row-offcanvas').toggleClass('active');
+				$('#lg-menu').toggleClass('hidden-xs').toggleClass('visible-xs');
+				$('#xs-menu').toggleClass('visible-xs').toggleClass('hidden-xs');
+				$('#btnShow').toggle();
+			});
+        });
+        </script>
+</body></html>

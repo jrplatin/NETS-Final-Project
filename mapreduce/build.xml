@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="HW2" default="jar" basedir=".">
+  <path id="project.class.path">
+    <pathelement location="lib/hadoop-mapreduce-client-core-2.8.1.jar"/>
+    <pathelement location="lib/hadoop-common-2.8.1.jar"/>    
+  </path>
+
+  <target name="javac" description="Compile java source to bytecode">
+    <mkdir dir="classes"/>
+    <javac srcdir="src" includes="**" encoding="utf-8" destdir="classes" target="1.8" nowarn="true"
+        debug="true" debuglevel="lines,vars,source" includeantruntime="false">
+      <classpath refid="project.class.path"/>
+    </javac>
+  </target>
+
+  <target name="jar" depends="javac" description="Create a JAR file">
+    <zip destfile="HW2.jar" basedir="classes"/>
+  </target>
+
+  <target name="pack" description="Create an archive for submission">
+    <zip destfile="submit-hw2.zip">
+      <zipfileset dir="." includes="**/*.java"/>
+      <zipfileset dir="." includes="**/results.txt"/>
+      <zipfileset dir="." includes="build.xml,README,.project,.classpath"/>
+      <zipfileset dir="." includes="**/*.jar" excludes="**/hadoop-mapreduce-client-core-2.8.1.jar,**/hadoop-common-2.8.1.jar,HW2.jar"/>
+      <zipfileset dir="." includes="**/*.js,**/**.ejs,**/**.json" excludes="visualizer/node_modules/**"/>
+    </zip>
+  </target>
+
+  <target name="clean" description="Cleans this project">
+    <delete includeemptydirs="true" failonerror="false">
+      <fileset dir="classes"/>
+      <fileset dir="." includes="HW2.jar"/>
+      <fileset dir="." includes="submit-hw*.zip"/>
+    </delete>
+  </target>
+
+</project>

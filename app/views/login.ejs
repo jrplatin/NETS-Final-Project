@@ -1,0 +1,192 @@
+<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" type="text/css" href="css/login.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+
+<script>
+
+$(document).ready(function(){
+
+
+
+	$("#buty").click(function(){
+		var us = $("#user").val();
+		var pass = $("#pass").val();
+	    $.post("/checklogin", { username: us, password : pass}, function(data, status){
+	    	if(data == "Bad Login" || data == "Error logging in: ValidationException: One or more parameter values were invalid: An AttributeValue may not contain an empty string"){
+	    		alert("Pleas try again: your username or password is incorrect");
+
+	    	}
+
+	    	else{
+	    						window.location += "feed";
+
+	    	}
+
+	    })
+
+	});
+
+
+
+ //signup handler
+	$("#signy").click(function(){
+
+
+			var fn = $("#firstName").val();
+			var ln = $("#lastName").val();
+			var ps = $("#password").val();
+			var conPs = $("#conPs").val();
+			var conEm = $("#conEm").val();
+			var em = $("#email").val();
+			var dt = $("#dater").val();
+
+
+
+
+		if(fn == "" || ln == "" || ps == "" || em == "" || dt == "" || conEm != em || conPs != ps){
+			alert("Please fill out the form correctly");
+		}
+
+		else {
+
+
+      //signup post request...handle all cases
+			var pass = $("#pass").val();
+		    $.post("/signup", { firstname: fn.toLowerCase(), lastname: ln.toLowerCase(), password : ps, email: em, birthday: dt}, function(data, status){
+
+			    console.log("cool");
+		       if(data == "Error creating user: ValidationError: \"email\" must be a valid email"){
+
+		       	alert("That email address is not valid, please enter a valid address");
+
+		       }
+		       else if(data == "A user with that userId already exists"){
+
+		       	alert("A user with that email already exists");
+
+		       }
+		       else {
+			    console.log("cool1");
+		       	   window.location = "feed";
+
+		       }
+
+		    });
+	    }
+	});
+});
+</script>
+<script>
+	//in-line functions to check matching
+    function checkPass(input) {
+
+        if (input.value != document.getElementById('password').value) {
+            input.setCustomValidity('Password Must be Matching.');
+        } else {
+            // input is valid -- reset the error message
+            input.setCustomValidity('');
+        }
+    }
+
+    function checkEmail(input) {
+
+        if (input.value != document.getElementById('email').value) {
+            input.setCustomValidity('Email Must be Matching.');
+        } else {
+            // input is valid -- reset the error message
+            input.setCustomValidity('');
+        }
+    }
+</script>
+
+<div id="navwrapper">
+  <div id="navbar"> <table class="tablewrapper">
+    <tr>
+      <td class="row1">Email or Phone</td>
+      <td class="row1">Password</td>
+    </tr>
+    <tr>
+      <td><input type="text" id = "user" class="inputtext1">
+      </td>
+      <td><input type="password" id = "pass" class="inputtext2">
+      </td>
+      <td id = "buty"><div id="button">Log In</div></td>
+    </tr>
+    <tr>
+
+  </table>
+
+    <h1 class="logowrapper">PennBook</h1>
+
+  </div>
+  </div>
+
+  <div id="contentwrapper">
+    <div id="content">
+
+      <div id="cheesyStuff">
+
+        <div class="connect bolder">
+          Connect with yours friends on PennBook.</div>
+
+        <div class="leftbar">
+          <div class="fb1">
+            <span class="rowtext">See updates</span>
+            <span class="rowtext2 fb1">from your friends.</span>
+          </div>
+        </div>
+
+          <div class="leftbar">
+          <div class="fb1">
+            <span class="rowtext">Share what's new</span>
+            <span class="rowtext2 fb1">and awesome in your life.</span>
+            </div>
+          </div>
+
+            <div class="leftbar">
+         
+        </div>
+
+
+      </div>
+      <!-- signup stuff -->
+      <div id="signup">
+        <div class="signup bolder">Sign Up</div>
+        <div class="free bolder">It's easy!</div>
+        <form>
+        <div class="formbox">
+        <input type="text" class="inputbody in1" id = "firstName" placeholder="First name" required>
+        <input type="text" class="inputbody in1 fr" id = "lastName" placeholder="Last name" required>
+        </div>
+        <div class="formbox">
+        <input type="text" class="inputbody in2" id = "email" placeholder="Email" required>
+        </div>
+        <div class="formbox">
+        <input type="text" class="inputbody in2" id= "conEm" placeholder="Re-enter email" oninput="checkEmail(this)" required>
+        </div>
+        <div class="formbox">
+				<input type = "password" id = "password" type="text" class="inputbody in2" placeholder="Password" required>
+				<div class="formbox">
+					<input type="password" class="inputbody in2" id = "conPs" placeholder="Confirm Password" oninput="checkPass(this)" required>
+        </div>
+        <div class="formbox">
+          <div class="bday">Birthday</div>
+        </div>
+        <div class="formbox">
+          <span data-type="selectors">
+            <span>
+              <input id = "dater" type="date" id="start"
+			       value="2018-07-22"
+			       min="1900-01-01" max="2018-12-31">
+            </span>
+
+
+            <div class="formbox">
+              <input onclick = "return false" type = "submit" id = "signy" class="signbut bolder">
+            </div>
+
+      </div>
+    </form>
+     </div>
+    </div>

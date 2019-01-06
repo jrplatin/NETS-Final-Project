@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <title>PennBook</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <link href="/css/bootstrap.css" rel="stylesheet">
+				<link href="/css/wall.css" rel="stylesheet">
+
+				<script language="javascript" type="text/javascript" src="/js/wall.js"></script>
+                <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+                <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+                <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+
+
+
+    </head>
+
+
+    <script>
+    //script defined here because of express vars...sorry
+		$(document).ready(function(){
+
+
+			$("#chatWindow").hide();
+			var beginIndex = 0;
+			var endIndex = 5;
+			$(window).scroll(function() {
+
+					
+			   if($(window).scrollTop() + $(window).height() + 0.5 >= $(document).height()) {
+			       beginIndex+=5; 
+			       endIndex+=5; 
+				$.post("/getWallData", {userId: "<%= profile.id%>", start: beginIndex, end: endIndex}, function(data, status){
+					
+
+
+
+					 var feedObject = data.data.feed;
+
+										 feedObject.forEach(function(el){
+											 	//add the feed object for each returned
+
+
+var typeString = "";
+										 switch (el.type) {
+											 case "PROFILE_UPDATE":
+											 	 typeString = el.fromName + " Updated Their Profile"
+												 break;
+											 case "SELF_POST":
+											 	 typeString = "My Post"
+												 break;
+											 case "NEW_FRIEND":
+											 	 typeString = "New Friend Alert"
+												 break;
+											 case "OTHER_POST":
+											   typeString = el.fromName + " Posted Something"
+											   break;
+
+
+											 default:
+												 break;
+										 }
+										 var element = document.getElementById("putUnder");
+										   var newElement = '' +
+											   '<div class=" panel panel-default">' +
+											 '<div class="populated panel-heading">' +
+											 '<h4>' + typeString + '</h4></div>' +
+											  '<div class="populated panel-body">' +
+												'<div class="clearfix"></div><p>' + el.content+'</p>' +
+												'</div><div class = "panel-footer"><p> Comments: </p><br>'
+												;
+
+											if(typeof el.comments  != 'undefined'){
+												el.comments.forEach(function(com){
+
+												newElement+= "<div style = 'border: 1px solid #ccc !important; border-radius:  15px;    padding:  5px' class = 'commentText'><p style = 'font-size: 1.39em'>" + com.name + "</p><p style = 'font-size: 1.2em'>" +  com.content + "</p></div><br>";
+												});
+											}
+											newElement += '<form><div class="input-group">' +
+												  '<div class="input-group-btn">' +
+												  '</div> <input class = "commentInputClass form-control" id ="' + el.id + '"  placeholder="Add a comment.." type="text">' +
+												'</div></form></div></div>';
+$("#putUnder").append(newElement);
+
+										 });
+
+				});
+			   }
+			});
+
+
+
+		//refresh the page
+			setInterval(refreshPage, 15000);
+
+
+		function refreshPage(){
+
+				  history.go(0);
+
+		}
+		//check if its your own wall and adjust accordingly
+				$("#addFriendButton").hide();
+			var isMe = ("<%= profile.email %>")
+			 == ("<%= currentProfile.email %>");
+			if(!isMe){
+
+				$("#changeProfText").hide();
+				$("#wallGor").hide();
+				$("#updateInfoButton").hide();
+				$("#visButton").hide();
+				$("#recFriend").hide();
+				$("#addFriendButton").show();
+
+
+			}
+
+		//add the friend button
+
+			var curId = ("<%= currentProfile.id %>")
+			 var otherFriend = ("<%= profile.friends %>").split(","); 
+			if(typeof otherFriend != "undefined"){
+				if(otherFriend.includes(curId)){
+					$("#addFriendButton").html("Unfriend");
+				}
+			}
+			var isFriend = $("#addFriendButton").text();
+
+			if(isFriend == "Add Friend"){
+
+
+
+$("#addFriendButton").click(function(){
+				$.post("/createFriendRequest", {id: "<%= currentProfile.id %>", toId: "<%= profile.id %>", fromName: "<%= currentProfile.first %> " + "<%= currentProfile.last %>"}, function(){
+			
+
+				});
+
+			});
+			} else {
+
+
+				$("#addFriendButton").click(function(){
+				var toId = "<%= profile.id%>";
+				$.post("/removeFriend", {fromId: "<%= currentProfile.id%>", toId: "<%= profile.id%>"}, function(){
+					
+
+				});
+				});
+
+
+			}
+			
+		//handle commens
+			$(document).on("keypress", ".commentInputClass", function(e) {
+		        if(e.which == 13) {
+  			  var text = $(this).closest('input').val();
+			  var relId = $(this).closest('input').attr('id');
+		            e.preventDefault();
+
+				if(text.length < 1){
+					alert("Enter a valid comment");
+				} else {
+
+
+
+				$.post("/addComment", {id: "<%= currentProfile.id%>", nameR: "<%= currentProfile.first%>" + " <%= currentProfile.last%>", actionId: relId, content:text}, 					function(data, status){
+					
+			});
+
+	$(this).closest("div").parent().prepend("<div style = 'border: 1px solid #ccc !important; border-radius:  15px;    padding:  5px' class = 'commentText'><p style = 'font-size: 1.39em'>" + text + "</p><p style = 'font-size: 1.2em'>" +  text + "</p></div><br>");
+
+
+				}
+    			}
+		});
+
+
+	$(".friendRequest").click(function(){
+
+		var toId = this.id;
+
+		$.post("/updateFriendRequest", {toId: toId, status: "accept"}, function(){
+					
+
+				});
+
+
+
+	});
+
+
+		    //post on other's wall
+			$("#postStatusButton").click(function(){
+					var text = $("#postTextBox").val();
+					if(text.length < 1){
+						alert("Enter a valid status");
+					}
+					else {
+					$.post("/postToWall", {email: "<%= profile.email%>", toId: "<%= profile.id%>", status: "accept", content: text}, 						function(data, status){
+							history.go(0);
+						
+						});
+
+					}
+
+					});
+
+
+			$('[data-toggle="popover"]').popover({
+			    html:true,
+			    content:function(){
+			    return ("<span id = 'leaveChat' style = 'cursor: pointer;color: #3B5999;'>Leave Chat</span><br><span href='#addMemberModal' data-toggle='modal'  id = 'addMem' style = 'cursor: pointer; color: #3B5999;'>Add members to chat</span>");
+		    },
+		    });
+
+			$("#chatSettings").hide();
+
+
+			   $(document).on('click', "#leaveChat", function() {
+
+
+			   $('[data-toggle="popover"]').popover('hide')
+
+			  		 	$('#chatActual').find('td').hide();
+			   			   	$('#chatSettings').find('td').hide();
+
+				   		$('#activeFriends').find('td').show();
+				   		//refresh page
+
+			   });
+
+		   //handle search bar
+			   $('#autoSearch').on('input',function(e){
+			   var postSearchVal = $('#autoSearch').val();
+			   if(postSearchVal.length != 0){
+
+			   $.post("/getSearch", { letter: postSearchVal}, function(data, status){
+	 			var obj = data.data.Items;
+				nameArray=new Array();
+				$.each(obj, function(key, val) {
+				  var nameR = val.first + " " + val.last;
+				  var obj = {value: nameR, label: nameR, id: val.id}
+				  nameArray.push(obj);
+				});
+
+				//JQuery UI notation for autocomplete
+				$( "#autoSearch" ).autocomplete({
+			      		source: nameArray,
+					select: function(event, ui) {
+
+								$.post("/getProfile", {id: ui.item.id}, 					function(data, status){
+
+						window.location = "/wall/"+ ui.item.id ;
+				});
+					  }
+
+			   	 });
+			     });
+			    }
+
+			});
+
+
+
+
+
+
+            //update profile picture modal
+		    $("#modalPicUpload").click(function (){
+		       if ($('#updatePic').get(0).files.length === 0) {
+					   alert("No picture selected.");
+					} else {
+						formData = new FormData();
+						formData.append("profilePicture", $('#updatePic').get(0).files[0]);
+						$.ajax({
+							  url: "/uploadProfilePicture",
+							  data: formData,
+							  processData: false,
+							  contentType: false,
+							  type: 'POST',
+							  success: function(data) {
+
+
+							        if(data.status == "success") {
+							            alert("Updated Profile Picture!");
+ 								    $('#updateProfilePic').modal('toggle');
+							        } else if(data.status == "failure") {
+							            alert(data.err);
+							        }
+							    }
+							});
+					}
+		    });
+
+
+            //update info
+			$("#modalUpdateButton").click(function(){
+				$("#updateModal").modal('toggle');
+				var interests = $("#interestsModal").val().split(",");
+				var firstName = $("#firstNameModal").val();
+				var lastName = $("#lastNameModal").val();
+				var affi = $("#affilModal").val();
+
+				if(interests.length < 1 || firstName.length < 3 || lastName.length < 3 || affi.length < 2){
+						alert("Please enter a valid email, affiliation, and/or interest")
+				} else  {
+					  //$('#updateModal').modal('toggle');
+
+					var newProfile = (<%- JSON.stringify(profile) %>);
+					newProfile.interests = interests;
+					newProfile.first = firstName;
+					newProfile.last = lastName;
+					newProfile.affiliation = affi;
+
+					var id = "<%= profile.id %>";
+			 		$.post("/updateProfile", { id: id, profile : newProfile}, function(data, status){
+						history.go(0);
+
+			 		});
+			 	}
+		   });
+
+		   $('#chatActual').find('td').hide();
+		   $('#activeChats').find('td').hide();
+
+		   $("#seeChats").click(function(){
+		   			   		$('#chatActual').find('td').hide();
+		   			   				$("#chatSettings").hide();
+
+
+			   	if($('#activeFriends').find('td').is(":visible")){
+			   		$('#activeFriends').find('td').hide();
+			   		$('#activeChats').find('td').show();
+
+			   	} else{
+			   	     	$('#activeChats').find('td').hide();
+			   			$('#activeFriends').find('td').show();
+
+
+			   	}
+
+		   });
+
+
+
+			 $("#activeChats").on("click", "td", function() {
+			 		$("#chatSettings").show();
+
+			  $("#activeChats").find('td').hide();
+		     	$("#chatActual").find('td').show();
+		   });
+
+
+
+		});
+    </script>
+
+    <body>
+      <div class="wrapper">
+			<div class="box">
+				<div class="row row-offcanvas row-offcanvas-left">
+					<!-- main -->
+					<div id="main">
+						<!-- nav -->
+						<div class="navbar navbar-blue navbar-fixed-top ">
+							<div class="navbar-header">
+							  <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+								<span class="sr-only">Toggle</span>
+								<span class="icon-bar"></span>
+								<span class="icon-bar"></span>
+								<span class="icon-bar"></span>
+							  </button>
+							  <a href="/feed" class="navbar-brand logo">p</a>
+							</div>
+                            <!-- lots of navbar bootstrap -->
+							<nav class="collapse navbar-collapse" role="navigation">
+							<form autocomplete = "off" class="navbar-form navbar-left">
+								<div class="autocomplete input-group input-group-sm" style="max-width:360px;">
+								  <input id = "autoSearch" class="form-control" placeholder="Search" name="srch-term" id="srch-term" type="text">
+								  <div class="input-group-btn">
+									<button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+								  </div>
+								</div>
+							</form>
+                            <!-- define the glyphicon layout -->
+							<ul class="nav navbar-nav">
+							  <li>
+								<a href="/feed"><i class="glyphicon glyphicon-home"></i> Home</a>
+							  </li>
+							  <li>
+								<a href="#postModal" role="button" data-toggle="modal"><i class="glyphicon glyphicon-plus"></i> Post to Wall</a>
+							  </li>
+							   <li>
+								<a  href="/chat" role="button"><i class="glyphicon glyphicon-comment"></i> Chat</a>
+							  </li>
+							  <li class="btn-group">
+									<a  class="dropdown-toggle" data-toggle="dropdown" ><i 										class="glyphicon glyphicon-globe"></i> Notifications</a>   
+   								  <ul id = "dropDownMenu" class="dropdown-menu" role="menu">
+							
+								  </ul>
+
+        								<script>
+										
+											var list = <%- typeof JSON.stringify(profile.friendRequests) != 'undefined'%>;
+			
+											var list = <%- typeof JSON.stringify(profile.friendRequests) != 'undefined' ?  JSON.stringify(profile.friendRequests) : "[]" %>;
+											list.forEach(function(el){
+												var newElement = '<li id = "' + el.userId+'" class = "friendRequest"><a> Friend Request From: ' + el.name + '</a></li><li class = "divider"</li>';
+												$("#dropDownMenu").append(newElement);
+
+											});
+
+										if(list.length == 0){
+											$("#dropDownMenu").append("<li><a> Nothing to show! </a></li>");
+										}
+												
+
+									
+			
+									</script>
+								 
+          
+							  </li>
+							  <li>
+									<a href="/logout"><i class="glyphicon glyphicon-log-out"></i> Logout</a>
+								</li>
+
+							</ul>
+
+							</nav>
+						</div>
+
+                        <!-- now we layout the content -->
+						<div class="padding">
+							<div class="full col-sm-9">
+
+
+								<div class="row">
+
+								 <!--define the left column -->
+								 <div class="col-sm-5" id = "sideStuff">
+
+									  <div class="panel panel-default">
+										<div class="panel-thumbnail"><img src="https://s3.amazonaws.com/nets212g12/<%= profile.id %>profile.jpg" class="img-responsive"></div>
+										<div style = "text-align: center"  class="panel-body">
+										   <p href="#updateProfilePic"data-toggle="modal"  id = "changeProfText" style = "font-size:0.9em; cursor: pointer;" > Change profile picture </p>
+											<p class="lead"><%= profile.first %> <%= profile.last %></p>
+											<a style = "text-align:center; font-size: 1.4em;" href = "/feed" id = "wallGor" class = "wallGoer">Go to my feed</a>
+												<br>
+										  <a class = "wallGoer" style = "font-size: 1.4em" id = "addFriendButton">Add Friend</a>
+
+											<a id = "visButton" style = "font-size: 1.2em" href = "/visualizer">Visualize your friends</a>
+
+
+
+
+										</div>
+									  </div>
+
+									<!--define the info panel -->
+									  <div class="panel panel-default">
+										<div class="panel-heading"> <h4>My Info</h4></div>
+										  <div class="panel-body">
+											<div class="list-group">
+											  <a class="list-group-item">Birthday: <%= profile.birthday %></a>
+											  <a  class="list-group-item">Interests: <%= profile.interests %></a>
+												<a  class="list-group-item">Email: <%= profile.email %></a>
+												<a  class="list-group-item">Affiliation: <%= profile.affiliation %></a>
+												<button href="#updateModal"class="btn btn-primary text-center" data-toggle="modal" style = "margin-top: 10px" id = "updateInfoButton" type="button">Update My Info</button>
+											</div>
+										  </div>
+									  </div>
+										<!--define the rec friends panel -->
+									<div  id = "recFriend" class="panel panel-default">
+										<div class="panel-heading" > <h4>Reccomended Friends</h4></div>
+										  <div class="panel-body">
+											<div class="list-group">
+											  <a class="list-group-item">Ben Robinov</a>
+											<a class="list-group-item">John Sarihan</a>
+											</div>
+										  </div>
+									  </div>
+								  </div>
+
+								  <!-- main content -->
+
+								  <div id = "putUnder" class="col-sm-7">
+										<script>
+										 var feedObject = <%- JSON.stringify(wall) %>;
+										if(feedObject.length == 0){
+											$("#putUnder").append("<h3 style = 'color:#3B5999; text-align:center'> Nothing to show! </h3>");
+										}
+
+										 feedObject.forEach(function(el){
+											 	//add the feed object for each returned
+
+
+var typeString = "";
+										 switch (el.type) {
+											 case "PROFILE_UPDATE":
+											 	 typeString = el.fromName + " Updated Their Profile"
+												 break;
+											 case "SELF_POST":
+											 	 typeString = "My Post"
+												 break;
+											 case "NEW_FRIEND":
+											 	 typeString = "New Friend Alert"
+												 break;
+											 case "OTHER_POST":
+											   typeString = el.fromName + " Posted Something"
+											   break;
+
+
+											 default:
+												 break;
+										 }
+										 var element = document.getElementById("putUnder");
+										   var newElement = '' +
+											   '<div class=" panel panel-default">' +
+											 '<div class="populated panel-heading">' +
+											 '<h4>' + typeString + '</h4></div>' +
+											  '<div class="populated panel-body">' +
+												'<div class="clearfix"></div><p>' + el.content+'</p>' +
+												'</div><div class = "panel-footer"><p> Comments: </p><br>'
+												;
+
+											if(typeof el.comments  != 'undefined'){
+												el.comments.forEach(function(com){
+
+												newElement+= "<div style = 'border: 1px solid #ccc !important; border-radius:  15px;    padding:  5px' class = 'commentText'><p style = 'font-size: 1.39em'>" + com.name + "</p><p style = 'font-size: 1.2em'>" +  com.content + "</p></div><br>";
+												});
+											}
+											newElement += '<form><div class="input-group">' +
+												  '<div class="input-group-btn">' +
+												  '</div> <input class = "commentInputClass form-control" id ="' + el.id + '"  placeholder="Add a comment.." type="text">' +
+												'</div></form></div></div>';
+											$("#putUnder").append(newElement);
+										 });
+
+										</script>
+								  </div>
+							   </div>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+
+		<!-- update modal-->
+		<div id="updateModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+				<div class="modal-dialog">
+				<div class="modal-content">
+
+					<div class="modal-body">
+							<div class="panel panel-default">
+						 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+
+									<div class="panel-heading"> <h4>My Info</h4></div>
+										<div class="panel-body">
+											<input = "text" style = "display:inline-block; margin-bottom:5px" id = "interestsModal" placeholder = "add interests" value = "<%= profile.interests %>" class="list-group-item">
+										  
+
+											
+											<input = "text" style = "margin-bottom:5px"  id = "firstNameModal" placeholder = "First Name" value = "<%= profile.first%>" class="list-group-item">
+											<input = "text" style = "margin-bottom:5px"  id = "lastNameModal" value = "<%= profile.last%>" placeholder = "Last Name" class="list-group-item">
+
+											<input = "text" style = "margin-bottom:5px"  id = "affilModal" value = "<%= profile.affiliation%>" placeholder = "Affiliation" class="list-group-item">
+											<button id = "modalUpdateButton" class="btn btn-primary btn-sm"  aria-hidden="true">Update!</button>
+										</div>
+									</div>
+					</div>
+
+				</div>
+				</div>
+			</div>
+
+
+			<!-- profile pic modal-->
+		<div id="updateProfilePic" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+				<div class="modal-dialog">
+				<div class="modal-content">
+
+					<div class="modal-body">
+							<div class="panel panel-default">
+						 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+
+									<div class="panel-heading"> <h4>Update Profile Picture</h4></div>
+										<div class="panel-body">
+
+								<input id = "updatePic" type="file" name="pic" accept="image/jpeg">
+								<br>
+											<button id = "modalPicUpload" class="btn btn-primary btn-sm"  aria-hidden="true">Update!</button>
+										</div>
+									</div>
+					</div>
+
+				</div>
+				</div>
+			</div>
+
+
+				<!-- add member modal-->
+		<div id="addMemberModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+				<div class="modal-dialog">
+				<div class="modal-content">
+
+					<div class="modal-body">
+							<div class="panel panel-default">
+						 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+
+									<div class="panel-heading"> <h4>Add Member to Chat</h4></div>
+										<div class="panel-body">
+
+										<form autocomplete = "off">
+											<div class="autocomplete input-group input-group-sm">
+											  <input id = "autoSearch2" class="form-control" placeholder="Search" name="srch-term" id="srch-term" type="text">
+											  <div class="input-group-btn">
+											  </div>
+											</div>
+										</form>
+
+											<br>
+											<button id = "modalAddMember" class="btn btn-primary btn-sm"  aria-hidden="true">Add!</button>
+										</div>
+									</div>
+					</div>
+
+				</div>
+				</div>
+			</div>
+
+						<!-- new chat modal-->
+		<div id="newChatModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+				<div class="modal-dialog">
+				<div class="modal-content">
+
+					<div class="modal-body">
+							<div class="panel panel-default">
+						 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+
+									<div class="panel-heading"> <h4>Start A New Chat</h4></div>
+										<div class="panel-body">
+
+										<form autocomplete = "off">
+											<div class="autocomplete input-group input-group-sm">
+											  <input id = "autoSearch3" class="form-control" placeholder="Search" name="srch-term" id="srch-term" type="text">
+											  <div class="input-group-btn">
+											  </div>
+											</div>
+										</form>
+
+											<br>
+											<button id = "modalAddMember" class="btn btn-primary btn-sm"  aria-hidden="true">Start!</button>
+										</div>
+									</div>
+					</div>
+
+				</div>
+				</div>
+			</div>
+
+
+
+		<!--post modal-->
+		<div id="postModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+		  <div class="modal-dialog">
+		  <div class="modal-content">
+			  <div class="modal-header">
+				  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+					Post to Wall
+			  </div>
+			  <div class="modal-body">
+				  <form class="form center-block">
+					<div class="form-group">
+					  <textarea id = "postTextBox" class="form-control input-lg" autofocus="" placeholder="What's on your mind?"></textarea>
+					</div>
+				  </form>
+			  </div>
+			  <div class="modal-footer">
+				  <div>
+							<form action="/action_page.php">
+								<input type="file" name="pic" accept="image/*">
+								<button class="btn btn-primary btn-sm" data-dismiss="modal" id = "postStatusButton" aria-hidden="true">Post</button>
+
+							</form>
+				  </div>
+			  </div>
+		  </div>
+		  </div>
+		</div>
+		   
+
+
+        <!--relevant stuff for modals -->
+        <script type="text/javascript" src="/js/bootstrap.js"></script>
+        <script type="text/javascript">
+        $(document).ready(function() {
+			$('[data-toggle=offcanvas]').click(function() {
+				$(this).toggleClass('visible-xs text-center');
+				$(this).find('i').toggleClass('glyphicon-chevron-right glyphicon-chevron-left');
+				$('.row-offcanvas').toggleClass('active');
+				$('#lg-menu').toggleClass('hidden-xs').toggleClass('visible-xs');
+				$('#xs-menu').toggleClass('visible-xs').toggleClass('hidden-xs');
+				$('#btnShow').toggle();
+			});
+        });
+        </script>
+</body></html>

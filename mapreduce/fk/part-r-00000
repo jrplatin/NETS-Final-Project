@@ -1,0 +1,5 @@
+%dogs	[b, c]	[]
+%football	[a, b]	[]
+a	[%football, c, b]	[1 a]
+b	[%dogs, %football, a]	[1 b]
+c	[%dogs, a]	[1 c]
